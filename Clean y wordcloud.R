@@ -43,22 +43,13 @@ df_du = nube(du,"DU")
 df_gf = nube(gf,"GF")
 
 
-# uno todos los dfs en uno solo 
-df  = df_yl %>%
-  union_all(df_vm) %>%
-  union_all(df_hds) %>%
-  union_all(df_rla) %>%
-  union_all(df_gf) %>%
-  union_all(df_fc) %>%
-  union_all(df_ma)
-
 # wordcloud de cada candidato
 
-wordcloud2(data = df_vm[1:2], size = 0.7, color = 'random-dark')
-wordcloud2(data = df_gf[1:2], size = 0.7, color = 'random-dark')
-wordcloud2(data = df_kf[1:2], size = 0.6, color = 'random-dark')
-wordcloud2(data = df_du[1:2], size = 0.7, color = 'random-dark')
-wordcloud2(data = df_yl[1:2], size = 0.7, color = 'random-dark')
+wordcloud2(data = df_vm[1:2], size = 0.5, color = 'random-dark')
+wordcloud2(data = df_gf[1:2], size = 0.5, color = 'random-dark')
+wordcloud2(data = df_kf[1:2], size = 0.5, color = 'random-dark')
+wordcloud2(data = df_du[1:2], size = 0.5, color = 'random-dark')
+wordcloud2(data = df_yl[1:2], size = 0.6, color = 'random-dark')
 
 count(df_yl)
 count(df_vm)
@@ -68,3 +59,23 @@ count(df_du)
 
 #ggplot(df[2:3], aes(candidato))+ 
  # geom_bar()
+
+df  = df_yl %>%
+  union(df_vm) %>%
+  union(df_gf) %>%
+  union(df_du) %>%
+  union(df_kf)
+
+
+df = df %>%
+  group_by(word)%>%
+  summarise(frecuencia =sum(freq))
+
+
+#wordcloud2(data = df[1:2], size = 0.3, color = 'random-dark')
+wordcloud(words = df$word, freq = df$frecuencia, 
+          min.freq = 2, max.words = 50, 
+          random.order = FALSE, 
+          colors = brewer.pal(8,"Dark2"))
+
+

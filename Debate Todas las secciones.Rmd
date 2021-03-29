@@ -1,0 +1,440 @@
+---
+title: "Debate Definitivo Peru 2021"
+output: 
+  flexdashboard::flex_dashboard:
+    orientation: rows
+    vertical_layout: scroll
+---
+
+```{r setup, include=FALSE}
+
+library(tidyverse)
+library(flexdashboard)
+library(tm)# para el text mining
+library(SnowballC) # para quitar las stopwords
+library(wordcloud2)#wordcloud con mejores interacciones
+library(wordcloud)
+library(RColorBrewer)
+
+
+# funcion nube genera df con el speech de cada candidato
+nube = function(x,iniciales){
+  
+  x = Corpus(VectorSource(x))# El texto es un speech la data debe subirse como un corpus
+  # inspect(vm) ## revisando
+  
+  ## Cleaning los stopwords, numeros y puntacion (no hay caracteres especiales &/?@)
+  x = x %>% 
+    tm_map(removeNumbers)%>% # eliminar los minutos
+    tm_map(removePunctuation)%>% # eliminar puntuacion o dospuntos
+    tm_map(stripWhitespace) # quitar dobles espacios o enter
+  
+  x = tm_map(x, content_transformer(tolower)) # aplicamos minusculas
+  x = tm_map(x, removeWords, stopwords("Spanish")) # quitar stopwords
+  x = tm_map(x, removeWords, 
+            c("entonces","aquí","el","de","en","que","por","los","las","para","una","con","este","vamos")) # quitar mis propias stopwords
+  
+  dtm = TermDocumentMatrix(x)# crear una taba con la frecuencia de repeticion 
+  matriz = as.matrix(dtm) # crear una matriz
+  palabras = sort(rowSums(matriz), decreasing = TRUE) # sumo las filas en la matriz
+  x_df = data.frame(row.names = NULL, word = names(palabras), freq = palabras, candidato = iniciales) # creo dataframe
+  return(x_df)
+}
+
+
+```
+
+Pandemia
+=============================
+
+Column
+-----------------------------------------------------------------------
+
+### Wordcloud Yonhy Lescano
+
+```{r}
+yl = readLines("debate/yl_pandemia.txt", encoding="UTF-8")
+df_yl = nube(yl,"YL")
+#wordcloud2(data = df_yl[1:2], size = 0.3, color = 'random-dark')
+
+wordcloud(words = df_yl$word, freq = df_yl$freq, 
+            min.freq = 2, max.words = 30, 
+            random.order = FALSE,
+            colors = brewer.pal(8,"Dark2"))
+sum(df_yl$freq)
+```
+
+### Wordcloud Veronika Mendoza
+
+```{r}
+vm = readLines("debate/vm_pandemia.txt", encoding="UTF-8")
+df_vm = nube(vm,"VM")
+#wordcloud2(data = df_vm[1:2], size = 0.3, color = 'random-dark')
+wordcloud(words = df_vm$word, freq = df_vm$freq, 
+            min.freq = 2, max.words = 30, 
+            random.order = FALSE,
+            colors = brewer.pal(10,"Dark2"))
+sum(df_vm$freq)
+```
+
+
+Column
+---------------------------------------------------------
+
+### Wordcloud George Forsyth
+
+```{r}
+gf = readLines("debate/gf_pandemia.txt", encoding="UTF-8")
+df_gf = nube(gf,"GF")
+#wordcloud2(data = df_gf[1:2], size = 0.3, color = 'random-dark')
+wordcloud(words = df_gf$word, freq = df_gf$freq, 
+            min.freq = 2, max.words = 30, 
+            random.order = FALSE,
+            colors = brewer.pal(8,"Dark2"))
+sum(df_gf$freq)
+```
+
+### Wordcloud Daniel Urresti
+
+```{r}
+du = readLines("debate/du_pandemia.txt", encoding="UTF-8")
+df_du = nube(du,"DU")
+#wordcloud2(data = df_du[1:2], size = 0.3, color = 'random-dark')
+wordcloud(words = df_du$word, freq = df_du$freq, 
+            min.freq = 2, max.words = 30, 
+            random.order = FALSE,
+            colors = brewer.pal(8,"Dark2"))
+sum(df_du$freq)
+
+```
+
+
+Column
+---------------------------------------------------------
+### Wordcloud Keiko Fujimori
+
+```{r}
+kf = readLines("debate/kf_pandemia.txt", encoding="UTF-8")
+df_kf = nube(kf,"KF")
+#wordcloud2(data = df_kf[1:2], size = 0.3, color = 'random-dark')
+wordcloud(words = df_kf$word, freq = df_kf$freq, 
+            min.freq = 2, max.words = 30, 
+            random.order = FALSE,
+            colors = brewer.pal(8,"Dark2"))
+sum(df_kf$freq)
+```
+
+### Wordcloud todas las propuestas
+
+```{r}
+df  = df_yl %>%
+  union(df_vm) %>%
+  union(df_gf) %>%
+  union(df_du) %>%
+  union(df_kf)
+
+df = df %>%
+  group_by(word)%>%
+  summarise(freq =sum(freq))
+
+wordcloud(words = df$word, freq = df$freq, 
+          min.freq = 2, max.words = 50, 
+          random.order = FALSE, 
+          colors = brewer.pal(8,"Dark2"))
+sum(df$freq)
+```
+
+
+Seguridad
+=============================
+
+Column
+-----------------------------------------------------------------------
+
+### Wordcloud Yonhy Lescano
+
+```{r}
+yl = readLines("debate/yl_seguridad.txt", encoding="UTF-8")
+df_yl = nube(yl,"YL")
+#wordcloud2(data = df_yl[1:2], size = 0.3, color = 'random-dark')
+wordcloud(words = df_yl$word, freq = df_yl$freq, 
+            min.freq = 2, max.words = 30, 
+            random.order = FALSE,
+            colors = brewer.pal(8,"Dark2"))
+sum(df_yl$freq)
+```
+
+### Wordcloud Veronika Mendoza
+
+```{r}
+vm = readLines("debate/vm_seguridad.txt", encoding="UTF-8")
+df_vm = nube(vm,"VM")
+#wordcloud2(data = df_vm[1:2], size = 0.3, color = 'random-dark')
+wordcloud(words = df_vm$word, freq = df_vm$freq, 
+            min.freq = 2, max.words = 30, 
+            random.order = FALSE,
+            colors = brewer.pal(8,"Dark2"))
+sum(df_vm$freq)
+```
+
+
+Column
+---------------------------------------------------------
+
+### Wordcloud George Forsyth
+
+```{r}
+gf = readLines("debate/gf_seguridad.txt", encoding="UTF-8")
+df_gf = nube(gf,"GF")
+#wordcloud2(data = df_gf[1:2], size = 0.3, color = 'random-dark')
+wordcloud(words = df_gf$word, freq = df_gf$freq, 
+            min.freq = 2, max.words = 30, 
+            random.order = FALSE,
+            colors = brewer.pal(8,"Dark2"))
+sum(df_gf$freq)
+```
+
+### Wordcloud Daniel Urresti
+
+```{r}
+du = readLines("debate/du_seguridad.txt", encoding="UTF-8")
+df_du = nube(du,"DU")
+#wordcloud2(data = df_du[1:2], size = 0.3, color = 'random-dark')
+wordcloud(words = df_du$word, freq = df_du$freq, 
+            min.freq = 2, max.words = 30, 
+            random.order = FALSE,
+            colors = brewer.pal(8,"Dark2"))
+sum(df_du$freq)
+```
+
+
+Column
+---------------------------------------------------------
+### Wordcloud Keiko Fujimori
+
+```{r}
+kf = readLines("debate/kf_seguridad.txt", encoding="UTF-8")
+df_kf = nube(kf,"KF")
+#wordcloud2(data = df_kf[1:2], size = 0.3, color = 'random-dark')
+wordcloud(words = df_kf$word, freq = df_kf$freq, 
+            min.freq = 2, max.words = 30, 
+            random.order = FALSE,
+            colors = brewer.pal(8,"Dark2"))
+sum(df_kf$freq)
+```
+
+### Wordcloud todas las propuestas
+
+```{r}
+df  = df_yl %>%
+  union(df_vm) %>%
+  union(df_gf) %>%
+  union(df_du) %>%
+  union(df_kf)
+
+df = df %>%
+  group_by(word)%>%
+  summarise(freq =sum(freq))
+
+wordcloud(words = df$word, freq = df$freq, 
+          min.freq = 2, max.words = 50, 
+          random.order = FALSE, 
+          colors = brewer.pal(8,"Dark2"))
+sum(df$freq)
+```
+
+
+Corrupcion
+=============================
+Column
+-----------------------------------------------------------------------
+
+### Wordcloud Yonhy Lescano
+
+```{r}
+yl = readLines("debate/yl_corrupcion.txt", encoding="UTF-8")
+df_yl = nube(yl,"YL")
+#wordcloud2(data = df_yl[1:2], size = 0.3, color = 'random-dark')
+wordcloud(words = df_yl$word, freq = df_yl$freq, 
+            min.freq = 2, max.words = 30, 
+            random.order = FALSE,
+            colors = brewer.pal(8,"Dark2"))
+sum(df_yl$freq)
+```
+
+### Wordcloud Veronika Mendoza
+
+```{r}
+vm = readLines("debate/vm_corrupcion.txt", encoding="UTF-8")
+df_vm = nube(vm,"VM")
+#wordcloud2(data = df_vm[1:2], size = 0.3, color = 'random-dark')
+wordcloud(words = df_vm$word, freq = df_vm$freq, 
+            min.freq = 2, max.words = 30, 
+            random.order = FALSE,
+            colors = brewer.pal(8,"Dark2"))
+sum(df_vm$freq)
+```
+
+
+Column
+---------------------------------------------------------
+
+### Wordcloud George Forsyth
+
+```{r}
+gf = readLines("debate/gf_corrupcion.txt", encoding="UTF-8")
+df_gf = nube(gf,"GF")
+#wordcloud2(data = df_gf[1:2], size = 0.3, color = 'random-dark')
+wordcloud(words = df_gf$word, freq = df_gf$freq, 
+            min.freq = 2, max.words = 30, 
+            random.order = FALSE,
+            colors = brewer.pal(8,"Dark2"))
+sum(df_gf$freq)
+```
+
+### Wordcloud Daniel Urresti
+
+```{r}
+du = readLines("debate/du_corrupcion.txt", encoding="UTF-8")
+df_du = nube(du,"DU")
+#wordcloud2(data = df_du[1:2], size = 0.3, color = 'random-dark')
+wordcloud(words = df_du$word, freq = df_du$freq, 
+            min.freq = 2, max.words = 30, 
+            random.order = FALSE,
+            colors = brewer.pal(8,"Dark2"))
+sum(df_du$freq)
+```
+
+
+Column
+---------------------------------------------------------
+### Wordcloud Keiko Fujimori
+
+```{r}
+kf = readLines("debate/kf_corrupcion.txt", encoding="UTF-8")
+df_kf = nube(kf,"KF")
+#wordcloud2(data = df_kf[1:2], size = 0.3, color = 'random-dark')
+wordcloud(words = df_kf$word, freq = df_kf$freq, 
+            min.freq = 2, max.words = 30, 
+            random.order = FALSE,
+            colors = brewer.pal(8,"Dark2"))
+sum(df_kf$freq)
+```
+
+### Wordcloud todas las propuestas
+
+```{r}
+df  = df_yl %>%
+  union(df_vm) %>%
+  union(df_gf) %>%
+  union(df_du) %>%
+  union(df_kf)
+
+df = df %>%
+  group_by(word)%>%
+  summarise(freq =sum(freq))
+
+wordcloud(words = df$word, freq = df$freq, 
+          min.freq = 2, max.words = 50, 
+          random.order = FALSE, 
+          colors = brewer.pal(8,"Dark2"))
+sum(df$freq)
+```
+
+Economia
+=============================
+
+Column
+-----------------------------------------------------------------------
+
+### Wordcloud Yonhy Lescano
+
+```{r}
+yl = readLines("debate/yl_economia.txt", encoding="UTF-8")
+df_yl = nube(yl,"YL")
+#wordcloud2(data = df_yl[1:2], size = 0.3, color = 'random-dark')
+wordcloud(words = df_yl$word, freq = df_yl$freq, 
+            min.freq = 2, max.words = 30, 
+            random.order = FALSE,
+            colors = brewer.pal(8,"Dark2"))
+sum(df_yl$freq)
+```
+
+### Wordcloud Veronika Mendoza
+
+```{r}
+vm = readLines("debate/vm_economia.txt", encoding="UTF-8")
+df_vm = nube(vm,"VM")
+#wordcloud2(data = df_vm[1:2], size = 0.3, color = 'random-dark')
+wordcloud(words = df_vm$word, freq = df_vm$freq, 
+            min.freq = 2, max.words = 30, 
+            random.order = FALSE,
+            colors = brewer.pal(8,"Dark2"))
+sum(df_vm$freq)
+```
+
+
+Column
+---------------------------------------------------------
+
+### Wordcloud George Forsyth
+
+```{r}
+gf = readLines("debate/gf_economia.txt", encoding="UTF-8")
+df_gf = nube(gf,"GF")
+#wordcloud2(data = df_gf[1:2], size = 0.3, color = 'random-dark')
+wordcloud(words = df_gf$word, freq = df_gf$freq, 
+            min.freq = 2, max.words = 30, 
+            random.order = FALSE,
+            colors = brewer.pal(8,"Dark2"))
+sum(df_gf$freq)
+```
+
+### Wordcloud Daniel Urresti
+
+```{r}
+du = readLines("debate/du_economia.txt", encoding="UTF-8")
+df_du = nube(du,"DU")
+#wordcloud2(data = df_du[1:2], size = 0.3, color = 'random-dark')
+wordcloud(words = df_du$word, freq = df_du$freq, 
+            min.freq = 2, max.words = 30, 
+            random.order = FALSE,
+            colors = brewer.pal(8,"Dark2"))
+sum(df_du$freq)
+```
+
+
+Column
+---------------------------------------------------------
+### Wordcloud Keiko Fujimori
+
+```{r}
+kf = readLines("debate/kf_economia.txt", encoding="UTF-8")
+df_kf = nube(kf,"KF")
+#wordcloud2(data = df_kf[1:2], size = 0.3, color = 'random-dark')
+wordcloud(words = df_kf$word, freq = df_kf$freq, 
+            min.freq = 2, max.words = 30, 
+            random.order = FALSE,
+            colors = brewer.pal(8,"Dark2"))
+sum(df_kf$freq)
+```
+
+### Wordcloud todas las propuestas
+
+```{r}
+df  = df_yl %>%
+  union(df_vm) %>%
+  union(df_gf) %>%
+  union(df_du) %>%
+  union(df_kf)
+
+df = df %>%
+  group_by(word)%>%
+  summarise(freq =sum(freq))
+
+wordcloud(words = df$word, freq = df$freq, 
+          min.freq = 2, max.words = 50, 
+          random.order = FALSE, 
+          colors = brewer.pal(8,"Dark2"))
+sum(df$freq)
+```
