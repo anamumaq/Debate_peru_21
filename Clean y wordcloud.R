@@ -7,33 +7,35 @@ library(wordcloud2) #wordcloud con mejores interacciones
 # funcion nube genera df con el speech de cada candidato
 nube = function(x,iniciales){
   
-  x = Corpus(VectorSource(x))# El texto es un speech la data debe subirse como un corpus
-  # inspect(vm) ## revisando
+  x = Corpus(VectorSource(vm))# El texto es un speech la data debe subirse como un corpus
+  #inspect(vm) ## revisando
   
   ## Cleaning los stopwords, numeros y puntacion (no hay caracteres especiales &/?@)
   x = x %>% 
     tm_map(removeNumbers)%>% # eliminar los minutos
     tm_map(removePunctuation)%>% # eliminar puntuacion o dospuntos
-    tm_map(stripWhitespace) # quitar dobles espacios o enter
+    tm_map(stripWhitespace)%>% # quitar dobles espacios o enter
+    tm_map(content_transformer(tolower))%>% # aplicamos minusculas
+    tm_map(removeWords, stopwords("Spanish"))%>% # quitar stopwords
+    tm_map(removeWords, 
+            c("entonces","aquí","el","de","en","que",
+              "por","los","las","para","una","con","este", "así","ejemplo", "vamos")) # quitar mis propias stopwords
   
-  x = tm_map(x, content_transformer(tolower)) # aplicamos minusculas
-  x = tm_map(x, removeWords, stopwords("Spanish")) # quitar stopwords
-  x = tm_map(x, removeWords, 
-             c("entonces","aquí","el","de","en","que","por","los","las","para","una","con","este")) # quitar mis propias stopwords
-  
-  dtm = TermDocumentMatrix(x)# crear una taba con la frecuencia de repeticion 
+  dtm = TermDocumentMatrix(x)# crear una tabla con la frecuencia de repeticion 
   matriz = as.matrix(dtm) # crear una matriz
   palabras = sort(rowSums(matriz), decreasing = TRUE) # sumo las filas en la matriz
-  x_df = data.frame(row.names = NULL, word = names(palabras), freq = palabras, candidato = iniciales) # creo dataframe
+  x_df = data.frame(row.names = NULL, palabra = names(palabras), freq = palabras, candidato = iniciales) # creo dataframe
   return(x_df)
 }
 
 # cargo los speechs de cada uno
-vm = readLines("debate/vm_corrupcion.txt", encoding="UTF-8") # extrae el texto con tildes
-du = readLines("debate/du_corrupcion.txt", encoding="UTF-8")
-gf = readLines("debate/gf_corrupcion.txt", encoding="UTF-8")
-kf = readLines("debate/kf_corrupcion.txt", encoding="UTF-8")
-yl = readLines("debate/yl_corrupcion.txt", encoding="UTF-8")
+vm = readLines("debate/vm_pandemia.txt", encoding = "UTF-8") # extrae el texto con tildes
+du = readLines("debate/du_pandemia.txt", encoding = "UTF-8")
+gf = readLines("debate/gf_pandemia.txt", encoding = "UTF-8")
+kf = readLines("debate/kf_pandemia.txt", encoding = "UTF-8")
+yl = readLines("debate/yl_pandemia.txt", encoding = "UTF-8")
+
+
 
 # genero df de cada speech
 df_yl = nube(yl,"YL")
@@ -50,6 +52,10 @@ wordcloud2(data = df_gf[1:2], size = 0.5, color = 'random-dark')
 wordcloud2(data = df_kf[1:2], size = 0.5, color = 'random-dark')
 wordcloud2(data = df_du[1:2], size = 0.5, color = 'random-dark')
 wordcloud2(data = df_yl[1:2], size = 0.6, color = 'random-dark')
+
+par(mfrow = c(2,2))
+wordcloud2(data = df_vm[1:2], size = 0.5, color = 'random-dark')
+wordcloud2(data = df_kf[1:2], size = 0.5, color = 'random-dark')
 
 count(df_yl)
 count(df_vm)
